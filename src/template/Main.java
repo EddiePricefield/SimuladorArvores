@@ -1,6 +1,8 @@
 package template;
 
+import ArvoresESD.ArvoreAVL;
 import ArvoresESD.ArvoreBinariaBusca;
+import ArvoresESD.ArvoreVermelhoPreto;
 import br.com.davidbuzatto.jsge.collision.CollisionUtils;
 import br.com.davidbuzatto.jsge.core.Camera2D;
 import br.com.davidbuzatto.jsge.core.engine.EngineFrame;
@@ -9,6 +11,7 @@ import static br.com.davidbuzatto.jsge.core.engine.EngineFrame.MOUSE_BUTTON_LEFT
 import br.com.davidbuzatto.jsge.geom.Rectangle;
 import br.com.davidbuzatto.jsge.imgui.GuiButton;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
+import br.com.davidbuzatto.jsge.imgui.GuiConfirmDialog;
 import br.com.davidbuzatto.jsge.imgui.GuiDropdownList;
 import br.com.davidbuzatto.jsge.imgui.GuiLabel;
 import br.com.davidbuzatto.jsge.imgui.GuiTextField;
@@ -17,8 +20,6 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 /**
  * Nome do Projeto.
@@ -47,13 +48,19 @@ public class Main extends EngineFrame {
     private GuiButton btnCima;
     
     private GuiDropdownList dropdownTipoArvore;
+    private int indexAnteriorDropdown = 0;
     
     private GuiTextField textFieldValor;
     private GuiButton btnCriar;
     private GuiLabel labelValor;
     
+    private GuiConfirmDialog confirmDialog;
+    private int noAtual;
+    
     //Componentes para Criação das Árvores
     private ArvoreBinariaBusca<Integer, String> arvoreBB;
+    private ArvoreAVL<Integer, String> arvoreAVL;
+    private ArvoreVermelhoPreto<Integer, String> arvoreVP;
     private aesd.ds.interfaces.List<ArvoreBinariaBusca.Node<Integer, String>> nos;
     private int margemCima;
     private int margemEsquerda;
@@ -112,24 +119,20 @@ public class Main extends EngineFrame {
         //Criação da Câmera
         cameraPos = new Vector2(0, 0);
         camera.target = cameraPos;
-        camera.offset = new Vector2(450, 275);
+        camera.offset = new Vector2(0, 0);
         camera.rotation = 0;
         camera.zoom = 1;
         
         //Criação das Árvores
         arvoreBB = new ArvoreBinariaBusca<>();
-        arvoreBB.put(5, "cinco");
-        arvoreBB.put(2, "dois");
-        arvoreBB.put(10, "dez");
-        arvoreBB.put(15, "quinze");
-        arvoreBB.put(12, "doze");
-        arvoreBB.put(1, "um");
-        arvoreBB.put(3, "três");
         nos = arvoreBB.coletarParaDesenho();
         margemCima = 125;
         margemEsquerda = 75;
         raio = 20;
         espacamento = 50;
+        
+        //Mensagem para caso queira remover um nó
+        confirmDialog = new GuiConfirmDialog( "Remoção de Nó", "Você deseja remover este nó?", "Sim", "Não", "", true);
         
         //Inserir os Componentes na Lista
         componentes.add(btnCima);
@@ -143,7 +146,7 @@ public class Main extends EngineFrame {
         componentes.add(btnCriar);
         componentes.add(labelValor);
         
-        
+        componentes.add(confirmDialog);
         
     }
     
@@ -158,14 +161,14 @@ public class Main extends EngineFrame {
         Color fundoBotao = LIGHTGRAY;
         Color cliqueBotao = new Color(151, 232, 255, 255);
         
-        if( isKeyDown(KEY_UP) || btnCima.isMouseDown() ){
+        if(isKeyDown(KEY_UP) || btnCima.isMouseDown()){
             cameraPos.y += cameraVel * delta;
             btnCima.setBackgroundColor(cliqueBotao);
         } else{
            btnCima.setBackgroundColor(fundoBotao);
         }
         
-        if( isKeyDown(KEY_DOWN) || btnBaixo.isMouseDown() ){
+        if(isKeyDown(KEY_DOWN) || btnBaixo.isMouseDown()){
             cameraPos.y -= cameraVel * delta;
             btnBaixo.setBackgroundColor(cliqueBotao);
         } else{
@@ -190,7 +193,45 @@ public class Main extends EngineFrame {
         camera.target.x = cameraPos.x;
         camera.target.y = cameraPos.y;            
         
-        Vector2 mousePos = getMousePositionPoint();
+        //Atualizar Valores da Árvore
+        if (btnCriar.isMousePressed()){
+            
+            if (dropdownTipoArvore.getSelectedItemIndex() == 0){
+                arvoreBB.put(Integer.parseInt(textFieldValor.getValue()), textFieldValor.getValue());
+                nos = arvoreBB.coletarParaDesenho();
+            }
+            
+        }
+        
+        //Resetar os nós ao mudar o Tipo de Árvore
+        if (dropdownTipoArvore.getSelectedItemIndex() != indexAnteriorDropdown){
+            
+            nos.clear();
+            indexAnteriorDropdown = dropdownTipoArvore.getSelectedItemIndex();
+            
+        }
+        
+        //Janela de Confirmação de Remoção do Nó
+        if (confirmDialog.isButton1Pressed()) {
+                    
+                    switch(dropdownTipoArvore.getSelectedItemIndex()){
+                        case 0: arvoreBB.delete(noAtual);
+                                nos = arvoreBB.coletarParaDesenho();
+                                break;
+                        case 1: arvoreAVL.delete(noAtual);
+                                break;
+                        case 2: arvoreVP.delete(noAtual);
+                                break;
+                    }
+                    
+                    confirmDialog.hide();
+                    
+                } else if (confirmDialog.isButton2Pressed() || confirmDialog.isCloseButtonPressed()){
+                    confirmDialog.hide();
+                }
+
+        //Remoção dos Nós da Árvore
+        Vector2 mousePos = camera.getScreenToWorld(getMousePositionPoint()); //Aqui precisamos converter a posição do mouse no mundo real, para a posição dele com a interferência da câmera
         
         if ( isMouseButtonPressed( MOUSE_BUTTON_LEFT ) ) {
             
@@ -202,19 +243,11 @@ public class Main extends EngineFrame {
                 );
 
                 if ( CollisionUtils.checkCollisionPointCircle( mousePos, centro, raio ) ) {
-                    SwingUtilities.invokeLater( () -> {
-                        int opcao = JOptionPane.showConfirmDialog( 
-                                this, 
-                                "Remover o nó " + no.key + "?",
-                                "Confirmação", 
-                                JOptionPane.YES_NO_OPTION );
-                        if ( opcao == JOptionPane.YES_OPTION ) {
-                            arvoreBB.delete( no.key );
-                            nos = arvoreBB.coletarParaDesenho();
-                        }
-                    });
+                    confirmDialog.setText("Nó: " + no.key + " | Ranque: " + no.ranque + " | Nível: " + no.nivel);
+                    noAtual = no.key;
+                    confirmDialog.show();                    
                 }
-
+                
             }
             
         }
@@ -245,7 +278,6 @@ public class Main extends EngineFrame {
         fillRectangle(926, 0, 277, 600, background);
         fillRectangle(0, 576, 1200, 25, background);
         fillRectangle(0, 0, 25, 600, background);
-
 
         //Círculo atrás do Joystick
         fillCircle(1065, 330, 30 , WHITE);
@@ -295,6 +327,7 @@ public class Main extends EngineFrame {
     
     private void desenharNo( ArvoreBinariaBusca.Node<Integer, String> no, int espHorizontal, int espVertical ) {
         fillCircle( espHorizontal * no.ranque + margemEsquerda, espVertical * no.nivel + margemCima, raio, no.cor );
+        drawText(no.value, (espHorizontal * no.ranque + margemEsquerda) - 5 , (espVertical * no.nivel + margemCima) - 5, 15, BLACK);
         drawCircle( espHorizontal * no.ranque + margemEsquerda, espVertical * no.nivel + margemCima, raio, BLACK );
     }
     
