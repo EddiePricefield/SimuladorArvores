@@ -1,12 +1,14 @@
 package template;
 
 import br.com.davidbuzatto.jsge.core.engine.EngineFrame;
+import static br.com.davidbuzatto.jsge.core.engine.EngineFrame.GRAY;
 import br.com.davidbuzatto.jsge.geom.Rectangle;
 import br.com.davidbuzatto.jsge.imgui.GuiButton;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiDropdownList;
 import br.com.davidbuzatto.jsge.imgui.GuiLabel;
 import br.com.davidbuzatto.jsge.imgui.GuiTextField;
+import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,6 +124,14 @@ public class Main extends EngineFrame {
         fillCircle(1065, 330, 30 , WHITE);
         drawCircle(1065, 330, 30, BLACK);
         
+        //Textos do Projeto
+        
+        switch(dropdownTipoArvore.getSelectedItemIndex()){
+            case 0 -> drawOutlinedText("Árvore Binária de Busca", 50, 50, 20, BEIGE, 1, BLACK);
+            case 1 -> drawOutlinedText("Árvore AVL", 50, 50, 20, BEIGE, 1, BLACK);
+            case 2 -> drawOutlinedText("Árvore Vermelho e Preto", 50, 50, 20, BEIGE, 1, BLACK);            
+        }
+        
         desenharComponentes();
     
     }
@@ -146,6 +156,15 @@ public class Main extends EngineFrame {
             }
         }
         
+    }
+    
+    public void drawOutlinedText(String text, int posX, int posY, int fontSize, Paint color, int outlineSize, Paint outlineColor) {
+        drawText(text, posX - 2, posY + 2, fontSize, GRAY);
+        drawText(text, posX - outlineSize, posY - outlineSize, fontSize, outlineColor);
+        drawText(text, posX + outlineSize, posY - outlineSize, fontSize, outlineColor);
+        drawText(text, posX - outlineSize, posY + outlineSize, fontSize, outlineColor);
+        drawText(text, posX + outlineSize, posY + outlineSize, fontSize, outlineColor);
+        drawText(text, posX, posY, fontSize, color);
     }
     
     //----------< Instanciar Engine e Iniciá-la >----------//
