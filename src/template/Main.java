@@ -4,6 +4,7 @@ import br.com.davidbuzatto.jsge.core.engine.EngineFrame;
 import br.com.davidbuzatto.jsge.geom.Rectangle;
 import br.com.davidbuzatto.jsge.imgui.GuiButton;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
+import br.com.davidbuzatto.jsge.imgui.GuiDropdownList;
 import br.com.davidbuzatto.jsge.imgui.GuiLabel;
 import br.com.davidbuzatto.jsge.imgui.GuiTextField;
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ public class Main extends EngineFrame {
     private GuiButton btnDireita;
     private GuiButton btnBaixo;
     private GuiButton btnCima;
+    
+    private GuiDropdownList dropdownTipoArvore;
     
     private GuiTextField textFieldValor;
     private GuiButton btnCriar;
@@ -70,12 +73,28 @@ public class Main extends EngineFrame {
         btnEsquerda = new GuiButton(x - espaco, y + espaco, 30, 30, "🡸");
         btnDireita = new GuiButton(x + espaco, y + espaco, 30, 30, "🡺");
         
+        //Selecionar o Tipo de Árvore
+        dropdownTipoArvore = new GuiDropdownList(x - 95, y + 150, 210, 30,
+                List.<String>of(
+                        "Árvore Binária de Busca", "Árvore AVL", "Árvore Vermelho e Preto"
+                )
+        );
+        
         //Inserção de Nós
+        labelValor = new GuiLabel(x + 8, y + 250, 10, 10, "00");
+        textFieldValor = new GuiTextField(x - 95, y + 300, 215, 20, "");
+        btnCriar = new GuiButton(x - 35, y + 330, 100, 25, "Inserir Valor");
         
         componentes.add(btnCima);
         componentes.add(btnBaixo);
         componentes.add(btnEsquerda);
         componentes.add(btnDireita);
+        
+        componentes.add(dropdownTipoArvore);
+        
+        componentes.add(textFieldValor);
+        componentes.add(btnCriar);
+        componentes.add(labelValor);
         
     }
     
@@ -100,8 +119,8 @@ public class Main extends EngineFrame {
         drawRectangle(exibicaoArvore, BLACK);
         
         //Círculo atrás do Joystick
-        fillCircle(1065, 300, 30 , WHITE);
-        drawCircle(1065, 300, 30, BLACK);
+        fillCircle(1065, 330, 30 , WHITE);
+        drawCircle(1065, 330, 30, BLACK);
         
         desenharComponentes();
     
