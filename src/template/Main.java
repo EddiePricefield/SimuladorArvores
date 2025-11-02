@@ -14,7 +14,6 @@ import br.com.davidbuzatto.jsge.imgui.GuiCheckBox;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiConfirmDialog;
 import br.com.davidbuzatto.jsge.imgui.GuiDropdownList;
-import br.com.davidbuzatto.jsge.imgui.GuiLabel;
 import br.com.davidbuzatto.jsge.imgui.GuiTextField;
 import br.com.davidbuzatto.jsge.math.Vector2;
 import java.awt.Color;
@@ -49,6 +48,9 @@ public class Main extends EngineFrame {
     private GuiButton btnDireita;
     private GuiButton btnBaixo;
     private GuiButton btnCima;
+    private GuiButton btnMais;
+    private GuiButton btnMenos;
+    private GuiButton btnReset;
     
     private GuiDropdownList dropdownTipoArvore;
     private int indexAnteriorDropdown = 0;
@@ -108,6 +110,9 @@ public class Main extends EngineFrame {
         btnBaixo = new GuiButton(x, y + 2 * espaco, 30, 30, "🡻");
         btnEsquerda = new GuiButton(x - espaco, y + espaco, 30, 30, "🡸");
         btnDireita = new GuiButton(x + espaco, y + espaco, 30, 30, "🡺");
+        btnMenos = new GuiButton(x - 3 * espaco + 5 , y + espaco + 5, 20, 20, "➖");
+        btnMais = new GuiButton(x + 3 * espaco + 5, y + espaco + 5, 20, 20, "➕");
+        btnReset = new GuiButton(x + espaco/4, y + espaco + espaco/4, 15, 15, "R");
         
         //Selecionar o Tipo de Árvore
         dropdownTipoArvore = new GuiDropdownList(x - 95, y + 150, 210, 30,
@@ -132,6 +137,9 @@ public class Main extends EngineFrame {
         
         //Criação das Árvores
         arvoreBB = new ArvoreBinariaBusca<>();
+        arvoreAVL = new ArvoreAVL<>();
+        arvoreVP = new ArvoreVermelhoPreto<>();
+        
         nos = arvoreBB.coletarParaDesenho();
         margemCima = 125;
         margemEsquerda = 75;
@@ -147,6 +155,9 @@ public class Main extends EngineFrame {
         componentes.add(btnBaixo);
         componentes.add(btnEsquerda);
         componentes.add(btnDireita);
+        componentes.add(btnMenos);
+        componentes.add(btnMais);
+        componentes.add(btnReset);
         
         componentes.add(dropdownTipoArvore);
         
@@ -167,7 +178,7 @@ public class Main extends EngineFrame {
         
         atualizarComponentes(delta);
         
-        //Joystick
+        //Joystick (Movimento da Câmera)
         Color fundoBotao = LIGHTGRAY;
         Color cliqueBotao = new Color(151, 232, 255, 255);
         
@@ -199,9 +210,38 @@ public class Main extends EngineFrame {
             btnDireita.setBackgroundColor(fundoBotao);
         }
         
+        //Zoom da Câmera
+        
+        if ( getMouseWheelMove() < 0 || btnMenos.isMouseDown()){
+            camera.zoom -= 1 * delta;
+            btnMenos.setBackgroundColor(cliqueBotao);
+        } else{
+            btnMenos.setBackgroundColor(fundoBotao);
+        }
+        
+        if (getMouseWheelMove() > 0 || btnMais.isMouseDown()){
+            camera.zoom += 1 * delta;
+            btnMais.setBackgroundColor(cliqueBotao);
+        } else{
+            btnMais.setBackgroundColor(fundoBotao);
+        }
+        
+        
+        //Resetar Câmera
+        if (isKeyDown(KEY_R) || btnReset.isMousePressed()) {
+            camera.rotation = 0;
+            camera.zoom = 1;
+            camera.target.x = 0;
+            camera.target.y = 0;
+            btnReset.setBackgroundColor(cliqueBotao);
+        } else{
+            btnReset.setBackgroundColor(fundoBotao);
+        }
+        
         //Atualizar Câmera
         camera.target.x = cameraPos.x;
-        camera.target.y = cameraPos.y;          
+        camera.target.y = cameraPos.y;
+        
         
         //Limitação de Dígitos
         if (checkLimite.isSelected()){
@@ -247,8 +287,14 @@ public class Main extends EngineFrame {
                         break;
             }
             
-            textFieldValor.setValue(valorAnterior);
+            camera.rotation = 0;
+            camera.zoom = 1;
+            camera.target.x = 0;
+            camera.target.y = 0;
+            
             confirmDeletarArvore.hide();
+            
+            textFieldValor.setValue(valorAnterior);
             
         } else if (confirmDeletarArvore.isButton2Pressed() || confirmDeletarArvore.isCloseButtonPressed()) {
             confirmDeletarArvore.hide();
@@ -257,10 +303,14 @@ public class Main extends EngineFrame {
         //Resetar os nós ao mudar o Tipo de Árvore
         if (dropdownTipoArvore.getSelectedItemIndex() != indexAnteriorDropdown){
             
-            arvoreBB.clear();
-            nos = arvoreBB.coletarParaDesenho();
-            arvoreAVL.clear();
-            arvoreVP.clear();
+            if (!arvoreBB.isEmpty()){
+                arvoreBB.clear();
+                nos = arvoreBB.coletarParaDesenho();
+            } else if (!arvoreAVL.isEmpty()){
+                arvoreAVL.clear();
+            } else if (!arvoreVP.isEmpty()){
+                arvoreVP.clear();
+            }
             
             indexAnteriorDropdown = dropdownTipoArvore.getSelectedItemIndex();
             
@@ -340,6 +390,10 @@ public class Main extends EngineFrame {
         //Círculo atrás do Joystick
         fillCircle(1065, 125, 70, WHITE);
         drawCircle(1065, 125, 70, BLACK);
+        fillCircle(1170, 125, 25, WHITE);
+        drawCircle(1170, 125, 25, BLACK);
+        fillCircle(960, 125, 25, WHITE);
+        drawCircle(960, 125, 25, BLACK);
         
         //Limitação de Digitos
         fillRectangle(960, 470, 200, 40, WHITE);
