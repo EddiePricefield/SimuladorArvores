@@ -102,7 +102,7 @@ public class Main extends EngineFrame {
         camera = new Camera2D();
         
         //Variáveis para referência
-        int x = 1050; int y = 75;
+        int x = 1048; int y = 75;
         int espaco = 35;
         
         //Joystick
@@ -115,7 +115,7 @@ public class Main extends EngineFrame {
         btnReset = new GuiButton(x + espaco/4, y + espaco + espaco/4, 15, 15, "R");
         
         //Selecionar o Tipo de Árvore
-        dropdownTipoArvore = new GuiDropdownList(x - 95, y + 150, 210, 30,
+        dropdownTipoArvore = new GuiDropdownList(x - 93, y + 150, 210, 30,
                 List.<String>of(
                         "Árvore Binária de Busca", "Árvore AVL", "Árvore Vermelho e Preto"
                 )
@@ -388,12 +388,16 @@ public class Main extends EngineFrame {
         fillRectangle(0, 0, 25, 600, background);
 
         //Círculo atrás do Joystick
-        fillCircle(1065, 125, 70, WHITE);
-        drawCircle(1065, 125, 70, BLACK);
-        fillCircle(1170, 125, 25, WHITE);
-        drawCircle(1170, 125, 25, BLACK);
-        fillCircle(960, 125, 25, WHITE);
-        drawCircle(960, 125, 25, BLACK);
+        fillCircle(1063, 125, 70, WHITE);
+        drawCircle(1063, 125, 70, BLACK);
+        fillCircle(1168, 125, 25, WHITE);
+        drawCircle(1168, 125, 25, BLACK);
+        fillCircle(958, 125, 25, WHITE);
+        drawCircle(958, 125, 25, BLACK);
+        
+        //Quadro para Animação
+        fillRectangle(960, 275, 200, 125, WHITE);
+        drawRectangle(960, 275, 200, 125, BLACK);
         
         //Limitação de Digitos
         fillRectangle(960, 470, 200, 40, WHITE);
