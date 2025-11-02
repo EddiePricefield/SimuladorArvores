@@ -15,11 +15,13 @@ import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiConfirmDialog;
 import br.com.davidbuzatto.jsge.imgui.GuiDropdownList;
 import br.com.davidbuzatto.jsge.imgui.GuiTextField;
+import static br.com.davidbuzatto.jsge.math.MathUtils.lerp;
 import br.com.davidbuzatto.jsge.math.Vector2;
 import java.awt.Color;
 import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Nome do Projeto.
@@ -64,7 +66,16 @@ public class Main extends EngineFrame {
     
     private GuiCheckBox checkLimite;
     
-    //Componentes para Criação das Árvores
+    //Variáveis para a Animação
+    private boolean animando;
+    private String animValue;
+    private Vector2 animIni;
+    private Vector2 animPos;
+    private Vector2 animFim;
+    private double animTempo;    
+    private double animVel;
+    
+    //Variáveis para Criação das Árvores
     private ArvoreBinariaBusca<Integer, String> arvoreBB;
     private ArvoreAVL<Integer, String> arvoreAVL;
     private ArvoreVermelhoPreto<Integer, String> arvoreVP;
@@ -133,7 +144,7 @@ public class Main extends EngineFrame {
         camera.target = cameraPos;
         camera.offset = new Vector2(0, 0);
         camera.rotation = 0;
-        camera.zoom = 1;
+        camera.zoom = 1;      
         
         //Criação das Árvores
         arvoreBB = new ArvoreBinariaBusca<>();
@@ -145,6 +156,11 @@ public class Main extends EngineFrame {
         margemEsquerda = 75;
         raio = 20;
         espacamento = 50;
+        
+        //Animação
+        animando = false;
+        animIni = new Vector2(margemEsquerda, margemCima);
+        animVel = 1.5; 
         
         //Mensagem para caso queira remover um nó
         confirmDeletarNo = new GuiConfirmDialog( "Remoção de Nó", "Você tem certeza que deseja remover este nó?", "Sim", "Não", "", true);
@@ -242,6 +258,24 @@ public class Main extends EngineFrame {
         camera.target.x = cameraPos.x;
         camera.target.y = cameraPos.y;
         
+        //Animação dos Nós
+        
+        if (animando){
+            
+            animTempo += delta * animVel;
+            
+            if (animTempo > 1){
+                animTempo = 1;
+            }
+            
+           animPos.x = lerp(animIni.x, animFim.x, animTempo);
+           animPos.y = lerp(animIni.y, animFim.y, animTempo);
+           
+           if (animTempo >= 1){
+               animando = false;
+           }
+            
+        }
         
         //Limitação de Dígitos
         if (checkLimite.isSelected()){
@@ -251,13 +285,26 @@ public class Main extends EngineFrame {
         }
         
         //Atualizar Valores da Árvore
-        if (textFieldValor.getValue() != "" && (btnCriar.isMousePressed() || isKeyDown(KEY_ENTER))) {
+        if (!animando && textFieldValor.getValue() != "" && (btnCriar.isMousePressed() || isKeyDown(KEY_ENTER))) {
             
             btnCriar.setBackgroundColor(cliqueBotao);
             
             if (dropdownTipoArvore.getSelectedItemIndex() == 0){
-                arvoreBB.put(Integer.parseInt(textFieldValor.getValue()), textFieldValor.getValue());
+                
+                animValue = textFieldValor.getValue();
+                animPos = animIni;
+                animTempo = 0;
+                
+                arvoreBB.put(Integer.valueOf(textFieldValor.getValue()), textFieldValor.getValue());
                 nos = arvoreBB.coletarParaDesenho();
+                
+                for (var no : nos){
+                    if (Objects.equals(no.key, Integer.valueOf(animValue))){
+                        animFim = new Vector2 (espacamento * no.ranque + margemEsquerda, espacamento * no.nivel + margemCima);
+                    }
+                }
+                
+                animando = true;
             }
             
         }else{
@@ -270,7 +317,6 @@ public class Main extends EngineFrame {
             valorAnterior = textFieldValor.getValue();
             textFieldValor.setValue("");
             confirmDeletarArvore.show();
-                        
         }
         
         if (confirmDeletarArvore.isVisible() && (confirmDeletarArvore.isButton1Pressed() || isKeyDown(KEY_ENTER))) {
@@ -293,11 +339,13 @@ public class Main extends EngineFrame {
             camera.target.y = 0;
             
             confirmDeletarArvore.hide();
+            animIni = new Vector2(1060, 337);
             
             textFieldValor.setValue(valorAnterior);
             
         } else if (confirmDeletarArvore.isButton2Pressed() || confirmDeletarArvore.isCloseButtonPressed()) {
             confirmDeletarArvore.hide();
+            textFieldValor.setValue(valorAnterior);
         }
         
         //Resetar os nós ao mudar o Tipo de Árvore
@@ -399,6 +447,22 @@ public class Main extends EngineFrame {
         fillRectangle(960, 275, 200, 125, WHITE);
         drawRectangle(960, 275, 200, 125, BLACK);
         
+        beginMode2D(camera);
+        if (animando){
+            
+            int numDigitos = String.valueOf(animValue).length();
+            
+            fillCircle(animPos.x, animPos.y, 20, GREEN);
+            switch (numDigitos) {
+                case 1 -> drawText(animValue, animPos.x - 4, animPos.y - 5, 15, BLACK);
+                case 2 -> drawText(animValue, animPos.x - 9, animPos.y - 5, 15, BLACK);
+                default -> drawText(animValue, animPos.x - 14, animPos.y - 5, 15, BLACK);
+            }
+            drawCircle(animPos.x, animPos.y, 20, BLACK);
+            
+        }
+        endMode2D();
+        
         //Limitação de Digitos
         fillRectangle(960, 470, 200, 40, WHITE);
         drawRectangle(960, 470, 200, 40, BLACK);
@@ -456,12 +520,10 @@ public class Main extends EngineFrame {
         int numDigitos = String.valueOf(no.key).length();
         
         fillCircle( x, y, raio, no.cor );
-        if (numDigitos == 1) {
-            drawText(no.value, x - 4 , y - 5, 15, BLACK);
-        }else if (numDigitos == 2){
-            drawText(no.value, x - 9 , y - 5, 15, BLACK);
-        } else{
-            drawText(no.value, x - 14 , y - 5, 15, BLACK);
+        switch (numDigitos) {
+            case 1 -> drawText(no.value, x - 4 , y - 5, 15, BLACK);
+            case 2 -> drawText(no.value, x - 9 , y - 5, 15, BLACK);
+            default -> drawText(no.value, x - 14 , y - 5, 15, BLACK);
         }
         drawCircle( x, y, raio, BLACK );
     }
