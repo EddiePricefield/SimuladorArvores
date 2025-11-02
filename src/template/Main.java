@@ -34,11 +34,13 @@ public class Main extends EngineFrame {
     
     //Variáveis
     private final Rectangle exibicaoArvore = new Rectangle(25, 25, 900, 550);
+    String valorAnterior;
+    private int noAtual;
     
     //Câmera
     private Camera2D camera;
     private Vector2 cameraPos;
-    private double cameraVel = 300;
+    private final double cameraVel = 300;
     
     //Componentes
     private List<GuiComponent> componentes;
@@ -53,10 +55,10 @@ public class Main extends EngineFrame {
     
     private GuiTextField textFieldValor;
     private GuiButton btnCriar;
-    private GuiLabel labelValor;
+    private GuiButton btnLimpar;
     
-    private GuiConfirmDialog confirmDialog;
-    private int noAtual;
+    private GuiConfirmDialog confirmDeletarNo;
+    private GuiConfirmDialog confirmDeletarArvore;
     
     private GuiCheckBox checkLimite;
     
@@ -115,9 +117,9 @@ public class Main extends EngineFrame {
         );
         
         //Componentes
-        labelValor = new GuiLabel(x + 8, y + 250, 10, 10, "00");
-        textFieldValor = new GuiTextField(x - 95, y + 353, 100, 20, "");
-        btnCriar = new GuiButton(x + 20, y + 350, 100, 25, "Inserir Valor");
+        textFieldValor = new GuiTextField(x - 105, y + 353, 100, 20, "");
+        btnCriar = new GuiButton(x + 5, y + 350, 100, 25, "Inserir Valor");
+        btnLimpar = new GuiButton(x + 110, y + 350, 25, 25, "♻");
         checkLimite = new GuiCheckBox(x - 70, y + 400, 30, 30, "Limitação de Digitos");
         checkLimite.setSelected(true);
         
@@ -137,7 +139,8 @@ public class Main extends EngineFrame {
         espacamento = 50;
         
         //Mensagem para caso queira remover um nó
-        confirmDialog = new GuiConfirmDialog( "Remoção de Nó", "Você deseja remover este nó?", "Sim", "Não", "", true);
+        confirmDeletarNo = new GuiConfirmDialog( "Remoção de Nó", "Você tem certeza que deseja remover este nó?", "Sim", "Não", "", true);
+        confirmDeletarArvore = new GuiConfirmDialog( "Limpar a Tela de Nós", "Esta ação irá excluir todos os nós da árvore.\nDeseja prosseguir?", "Sim", "Não", "", true);
         
         //Inserir os Componentes na Lista
         componentes.add(btnCima);
@@ -149,10 +152,11 @@ public class Main extends EngineFrame {
         
         componentes.add(textFieldValor);
         componentes.add(btnCriar);
-        componentes.add(labelValor);
+        componentes.add(btnLimpar);
         componentes.add(checkLimite);
         
-        componentes.add(confirmDialog);
+        componentes.add(confirmDeletarNo);
+        componentes.add(confirmDeletarArvore);
         
     }
     
@@ -207,7 +211,7 @@ public class Main extends EngineFrame {
         }
         
         //Atualizar Valores da Árvore
-        if (btnCriar.isMousePressed() || isKeyDown(KEY_ENTER)) {
+        if (textFieldValor.getValue() != "" && (btnCriar.isMousePressed() || isKeyDown(KEY_ENTER))) {
             
             btnCriar.setBackgroundColor(cliqueBotao);
             
@@ -220,32 +224,69 @@ public class Main extends EngineFrame {
             btnCriar.setBackgroundColor(fundoBotao);
         }
         
+        //Deletar a Árvore Inteira
+        
+        if (btnLimpar.isMousePressed() || isKeyDown(KEY_DELETE)){
+            valorAnterior = textFieldValor.getValue();
+            textFieldValor.setValue("");
+            confirmDeletarArvore.show();
+                        
+        }
+        
+        if (confirmDeletarArvore.isVisible() && (confirmDeletarArvore.isButton1Pressed() || isKeyDown(KEY_ENTER))) {
+            
+            switch(dropdownTipoArvore.getSelectedItemIndex()){
+                case 0: arvoreBB.clear();     
+                        nos = arvoreBB.coletarParaDesenho();
+                        break;
+                case 1: arvoreAVL.clear();     
+                        nos = arvoreBB.coletarParaDesenho();
+                        break;
+                case 2: arvoreVP.clear();     
+                        nos = arvoreBB.coletarParaDesenho();
+                        break;
+            }
+            
+            textFieldValor.setValue(valorAnterior);
+            confirmDeletarArvore.hide();
+            
+        } else if (confirmDeletarArvore.isButton2Pressed() || confirmDeletarArvore.isCloseButtonPressed()) {
+            confirmDeletarArvore.hide();
+        }
+        
         //Resetar os nós ao mudar o Tipo de Árvore
         if (dropdownTipoArvore.getSelectedItemIndex() != indexAnteriorDropdown){
             
-            nos.clear();
+            arvoreBB.clear();
+            nos = arvoreBB.coletarParaDesenho();
+            arvoreAVL.clear();
+            arvoreVP.clear();
+            
             indexAnteriorDropdown = dropdownTipoArvore.getSelectedItemIndex();
             
         }
         
         //Janela de Confirmação de Remoção do Nó
-        if (confirmDialog.isButton1Pressed()) {
-                    
-                    switch(dropdownTipoArvore.getSelectedItemIndex()){
-                        case 0: arvoreBB.delete(noAtual);
-                                nos = arvoreBB.coletarParaDesenho();
-                                break;
-                        case 1: arvoreAVL.delete(noAtual);
-                                break;
-                        case 2: arvoreVP.delete(noAtual);
-                                break;
-                    }
-                    
-                    confirmDialog.hide();
-                    
-                } else if (confirmDialog.isButton2Pressed() || confirmDialog.isCloseButtonPressed()){
-                    confirmDialog.hide();
-                }
+        if (confirmDeletarNo.isButton1Pressed()) {
+
+            switch (dropdownTipoArvore.getSelectedItemIndex()) {
+                case 0:
+                    arvoreBB.delete(noAtual);
+                    nos = arvoreBB.coletarParaDesenho();
+                    break;
+                case 1:
+                    arvoreAVL.delete(noAtual);
+                    break;
+                case 2:
+                    arvoreVP.delete(noAtual);
+                    break;
+            }
+
+            confirmDeletarNo.hide();
+
+        } else if (confirmDeletarNo.isButton2Pressed() || confirmDeletarNo.isCloseButtonPressed()) {
+            confirmDeletarNo.hide();
+        }
 
         //Remoção dos Nós da Árvore
         Vector2 mousePos = camera.getScreenToWorld(getMousePositionPoint()); //Aqui precisamos converter a posição do mouse no mundo real, para a posição dele com a interferência da câmera
@@ -260,9 +301,9 @@ public class Main extends EngineFrame {
                 );
 
                 if ( CollisionUtils.checkCollisionPointCircle( mousePos, centro, raio ) ) {
-                    confirmDialog.setText("Nó: " + no.key + " | Ranque: " + no.ranque + " | Nível: " + no.nivel);
+                    confirmDeletarNo.setText("Nó: " + no.key + " | Ranque: " + no.ranque + " | Nível: " + no.nivel);
                     noAtual = no.key;
-                    confirmDialog.show();                    
+                    confirmDeletarNo.show();                    
                 }
                 
             }
@@ -299,10 +340,6 @@ public class Main extends EngineFrame {
         //Círculo atrás do Joystick
         fillCircle(1065, 125, 70, WHITE);
         drawCircle(1065, 125, 70, BLACK);
-        
-        
-        fillCircle(1065, 330, 30 , WHITE);
-        drawCircle(1065, 330, 30, BLACK);
         
         //Limitação de Digitos
         fillRectangle(960, 470, 200, 40, WHITE);
