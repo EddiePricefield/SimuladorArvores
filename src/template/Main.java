@@ -10,6 +10,7 @@ import static br.com.davidbuzatto.jsge.core.engine.EngineFrame.GRAY;
 import static br.com.davidbuzatto.jsge.core.engine.EngineFrame.MOUSE_BUTTON_LEFT;
 import br.com.davidbuzatto.jsge.geom.Rectangle;
 import br.com.davidbuzatto.jsge.imgui.GuiButton;
+import br.com.davidbuzatto.jsge.imgui.GuiCheckBox;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiConfirmDialog;
 import br.com.davidbuzatto.jsge.imgui.GuiDropdownList;
@@ -56,6 +57,8 @@ public class Main extends EngineFrame {
     
     private GuiConfirmDialog confirmDialog;
     private int noAtual;
+    
+    private GuiCheckBox checkLimite;
     
     //Componentes para Criação das Árvores
     private ArvoreBinariaBusca<Integer, String> arvoreBB;
@@ -111,10 +114,12 @@ public class Main extends EngineFrame {
                 )
         );
         
-        //Inserção de Nós
+        //Componentes
         labelValor = new GuiLabel(x + 8, y + 250, 10, 10, "00");
-        textFieldValor = new GuiTextField(x - 95, y + 300, 215, 20, "");
-        btnCriar = new GuiButton(x - 35, y + 330, 100, 25, "Inserir Valor");
+        textFieldValor = new GuiTextField(x - 95, y + 353, 100, 20, "");
+        btnCriar = new GuiButton(x + 20, y + 350, 100, 25, "Inserir Valor");
+        checkLimite = new GuiCheckBox(x - 70, y + 400, 30, 30, "Limitação de Digitos");
+        checkLimite.setSelected(true);
         
         //Criação da Câmera
         cameraPos = new Vector2(0, 0);
@@ -145,6 +150,7 @@ public class Main extends EngineFrame {
         componentes.add(textFieldValor);
         componentes.add(btnCriar);
         componentes.add(labelValor);
+        componentes.add(checkLimite);
         
         componentes.add(confirmDialog);
         
@@ -191,16 +197,27 @@ public class Main extends EngineFrame {
         
         //Atualizar Câmera
         camera.target.x = cameraPos.x;
-        camera.target.y = cameraPos.y;            
+        camera.target.y = cameraPos.y;          
+        
+        //Limitação de Dígitos
+        if (checkLimite.isSelected()){
+            if (textFieldValor.getValue().length() > 3){
+                textFieldValor.setValue(textFieldValor.getValue().substring(0, 3));
+            }
+        }
         
         //Atualizar Valores da Árvore
-        if (btnCriar.isMousePressed()){
+        if (btnCriar.isMousePressed() || isKeyDown(KEY_ENTER)) {
+            
+            btnCriar.setBackgroundColor(cliqueBotao);
             
             if (dropdownTipoArvore.getSelectedItemIndex() == 0){
                 arvoreBB.put(Integer.parseInt(textFieldValor.getValue()), textFieldValor.getValue());
                 nos = arvoreBB.coletarParaDesenho();
             }
             
+        }else{
+            btnCriar.setBackgroundColor(fundoBotao);
         }
         
         //Resetar os nós ao mudar o Tipo de Árvore
@@ -280,8 +297,19 @@ public class Main extends EngineFrame {
         fillRectangle(0, 0, 25, 600, background);
 
         //Círculo atrás do Joystick
+        fillCircle(1065, 125, 70, WHITE);
+        drawCircle(1065, 125, 70, BLACK);
+        
+        
         fillCircle(1065, 330, 30 , WHITE);
         drawCircle(1065, 330, 30, BLACK);
+        
+        //Limitação de Digitos
+        fillRectangle(960, 470, 200, 40, WHITE);
+        drawRectangle(960, 470, 200, 40, BLACK);
+        if (checkLimite.isSelected()){
+            drawText("*máximo de 3 dígitos", 995, 520, 12, RED);
+        }
         
         //Textos do Projeto
         switch(dropdownTipoArvore.getSelectedItemIndex()){
@@ -326,9 +354,21 @@ public class Main extends EngineFrame {
     }
     
     private void desenharNo( ArvoreBinariaBusca.Node<Integer, String> no, int espHorizontal, int espVertical ) {
-        fillCircle( espHorizontal * no.ranque + margemEsquerda, espVertical * no.nivel + margemCima, raio, no.cor );
-        drawText(no.value, (espHorizontal * no.ranque + margemEsquerda) - 5 , (espVertical * no.nivel + margemCima) - 5, 15, BLACK);
-        drawCircle( espHorizontal * no.ranque + margemEsquerda, espVertical * no.nivel + margemCima, raio, BLACK );
+        
+        int x = espHorizontal * no.ranque + margemEsquerda;
+        int y = espVertical * no.nivel + margemCima;
+        
+        int numDigitos = String.valueOf(no.key).length();
+        
+        fillCircle( x, y, raio, no.cor );
+        if (numDigitos == 1) {
+            drawText(no.value, x - 4 , y - 5, 15, BLACK);
+        }else if (numDigitos == 2){
+            drawText(no.value, x - 9 , y - 5, 15, BLACK);
+        } else{
+            drawText(no.value, x - 14 , y - 5, 15, BLACK);
+        }
+        drawCircle( x, y, raio, BLACK );
     }
     
     //----------< Instanciar Engine e Iniciá-la >----------//
