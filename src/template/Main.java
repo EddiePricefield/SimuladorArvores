@@ -80,7 +80,9 @@ public class Main extends EngineFrame {
     private ArvoreBinariaBusca<Integer, String> arvoreBB;
     private ArvoreAVL<Integer, String> arvoreAVL;
     private ArvoreVermelhoPreto<Integer, String> arvoreVP;
-    private aesd.ds.interfaces.List<ArvoreBinariaBusca.Node<Integer, String>> nos;
+    private aesd.ds.interfaces.List<ArvoreBinariaBusca.Node<Integer, String>> nosBB;
+    private aesd.ds.interfaces.List<ArvoreAVL.Node<Integer, String>> nosAVL;
+    private aesd.ds.interfaces.List<ArvoreVermelhoPreto.Node<Integer, String>> nosVP;
     private int margemCima;
     private int margemEsquerda;
     private int raio;
@@ -152,7 +154,9 @@ public class Main extends EngineFrame {
         arvoreAVL = new ArvoreAVL<>();
         arvoreVP = new ArvoreVermelhoPreto<>();
         
-        nos = arvoreBB.coletarParaDesenho();
+        nosBB = arvoreBB.coletarParaDesenho();
+        nosAVL = arvoreAVL.coletarParaDesenho();
+        nosVP = arvoreVP.coletarParaDesenho();
         margemCima = 125;
         margemEsquerda = 75;
         raio = 20;
@@ -288,33 +292,67 @@ public class Main extends EngineFrame {
         //Atualizar Valores da Árvore
         if (!animando && textFieldValor.getValue() != "" && (btnCriar.isMousePressed() || isKeyDown(KEY_ENTER))) {
             
-            btnCriar.setBackgroundColor(cliqueBotao);
-            
-            if (dropdownTipoArvore.getSelectedItemIndex() == 0){
-                
-                animValue = textFieldValor.getValue();
-                animTempo = 0;
-                
+        btnCriar.setBackgroundColor(cliqueBotao);
+
+            animValue = textFieldValor.getValue();
+            animTempo = 0;
+
+            if (dropdownTipoArvore.getSelectedItemIndex() == 0) {
                 arvoreBB.put(Integer.valueOf(textFieldValor.getValue()), textFieldValor.getValue());
-                nos = arvoreBB.coletarParaDesenho();
+                nosBB = arvoreBB.coletarParaDesenho();
                 
-                for (var no : nos){
-                    if (Objects.equals(no.key, Integer.valueOf(animValue))){
-                        animFim = new Vector2 (espacamento * no.ranque + margemEsquerda, espacamento * no.nivel + margemCima);
-                        
-                        if (no.ranque == ranqueAnterior){
-                            animIni = new Vector2 (espacamento * (no.ranque + 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
+                for (var no : nosBB) {
+                    if (Objects.equals(no.key, Integer.valueOf(animValue))) {
+                        animFim = new Vector2(espacamento * no.ranque + margemEsquerda, espacamento * no.nivel + margemCima);
+
+                        if (no.ranque == ranqueAnterior) {
+                            animIni = new Vector2(espacamento * (no.ranque + 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
                         }
-                        
+
                         ranqueAnterior = no.ranque;
-                        
+
                     }
                 }
                 
-                animPos = animIni;
-                animando = true;
+            } else if (dropdownTipoArvore.getSelectedItemIndex() == 1){
+                arvoreAVL.put(Integer.valueOf(textFieldValor.getValue()), textFieldValor.getValue());
+                nosAVL = arvoreAVL.coletarParaDesenho();
+                
+                for (var no : nosAVL) {
+                    if (Objects.equals(no.key, Integer.valueOf(animValue))) {
+                        animFim = new Vector2(espacamento * no.ranque + margemEsquerda, espacamento * no.nivel + margemCima);
+
+                        if (no.ranque == ranqueAnterior) {
+                            animIni = new Vector2(espacamento * (no.ranque + 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
+                        }
+
+                        ranqueAnterior = no.ranque;
+
+                    }
+                }
+                
+            } else{
+                arvoreVP.put(Integer.valueOf(textFieldValor.getValue()), textFieldValor.getValue());
+                nosVP = arvoreVP.coletarParaDesenho();
+                
+                for (var no : nosVP) {
+                    if (Objects.equals(no.key, Integer.valueOf(animValue))) {
+                        animFim = new Vector2(espacamento * no.ranque + margemEsquerda, espacamento * no.nivel + margemCima);
+
+                        if (no.ranque == ranqueAnterior) {
+                            animIni = new Vector2(espacamento * (no.ranque + 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
+                        }
+
+                        ranqueAnterior = no.ranque;
+
+                    }
+                }
+                
             }
-            
+
+            animPos = animIni;
+            animando = true;
+
         }else{
             btnCriar.setBackgroundColor(fundoBotao);
         }
@@ -331,13 +369,19 @@ public class Main extends EngineFrame {
             
             switch(dropdownTipoArvore.getSelectedItemIndex()){
                 case 0: arvoreBB.clear();     
-                        nos = arvoreBB.coletarParaDesenho();
+                        nosBB = arvoreBB.coletarParaDesenho();
+                        ranqueAnterior = -1;
+                        animIni = new Vector2(margemEsquerda, margemCima);
                         break;
                 case 1: arvoreAVL.clear();     
-                        nos = arvoreBB.coletarParaDesenho();
+                        nosAVL = arvoreAVL.coletarParaDesenho();
+                        ranqueAnterior = -1;
+                        animIni = new Vector2(margemEsquerda, margemCima);
                         break;
                 case 2: arvoreVP.clear();     
-                        nos = arvoreBB.coletarParaDesenho();
+                        nosVP = arvoreVP.coletarParaDesenho();
+                        ranqueAnterior = -1;
+                        animIni = new Vector2(margemEsquerda, margemCima);
                         break;
             }
             
@@ -347,10 +391,10 @@ public class Main extends EngineFrame {
             camera.target.y = 0;
             
             confirmDeletarArvore.hide();
-            animIni = new Vector2(1060, 337);
+            animIni = new Vector2(margemEsquerda, margemCima);
             
             textFieldValor.setValue(valorAnterior);
-            
+        
         } else if (confirmDeletarArvore.isButton2Pressed() || confirmDeletarArvore.isCloseButtonPressed()) {
             confirmDeletarArvore.hide();
             textFieldValor.setValue(valorAnterior);
@@ -361,15 +405,23 @@ public class Main extends EngineFrame {
             
             if (!arvoreBB.isEmpty()){
                 arvoreBB.clear();
-                nos = arvoreBB.coletarParaDesenho();
+                nosBB = arvoreBB.coletarParaDesenho();
+                ranqueAnterior = -1;
+                animIni = new Vector2(margemEsquerda, margemCima);
             } else if (!arvoreAVL.isEmpty()){
                 arvoreAVL.clear();
+                nosAVL = arvoreAVL.coletarParaDesenho();
+                ranqueAnterior = -1;
+                animIni = new Vector2(margemEsquerda, margemCima);
             } else if (!arvoreVP.isEmpty()){
                 arvoreVP.clear();
+                nosVP = arvoreVP.coletarParaDesenho();
+                ranqueAnterior = -1;
+                animIni = new Vector2(margemEsquerda, margemCima);
             }
             
             indexAnteriorDropdown = dropdownTipoArvore.getSelectedItemIndex();
-            
+        
         }
         
         //Janela de Confirmação de Remoção do Nó
@@ -378,13 +430,15 @@ public class Main extends EngineFrame {
             switch (dropdownTipoArvore.getSelectedItemIndex()) {
                 case 0:
                     arvoreBB.delete(noAtual);
-                    nos = arvoreBB.coletarParaDesenho();
+                    nosBB = arvoreBB.coletarParaDesenho();
                     break;
                 case 1:
                     arvoreAVL.delete(noAtual);
+                    nosAVL = arvoreAVL.coletarParaDesenho();
                     break;
                 case 2:
                     arvoreVP.delete(noAtual);
+                    nosVP = arvoreVP.coletarParaDesenho();
                     break;
             }
 
@@ -399,7 +453,7 @@ public class Main extends EngineFrame {
         
         if ( isMouseButtonPressed( MOUSE_BUTTON_LEFT ) ) {
             
-            for ( ArvoreBinariaBusca.Node<Integer, String> no : nos ) {
+            for ( ArvoreBinariaBusca.Node<Integer, String> no : nosBB ) {
 
                 Vector2 centro = new Vector2( 
                     espacamento * no.ranque + margemEsquerda, 
@@ -428,9 +482,24 @@ public class Main extends EngineFrame {
                 
         //Desenhar a Árvore (Quero que fique atrás de tudo)
         beginMode2D(camera);
-        for ( ArvoreBinariaBusca.Node<Integer, String> no : nos ) {
-            desenharNo( no, espacamento, espacamento );
-        }
+        
+        switch( dropdownTipoArvore.getSelectedItemIndex() ){
+            case 0: 
+                for (ArvoreBinariaBusca.Node<Integer, String> no : nosBB) {
+                    desenharNo(no, espacamento, espacamento);
+                }
+                break;
+            case 1:
+                for (ArvoreAVL.Node<Integer, String> no : nosAVL) {
+                    desenharNo(no, espacamento, espacamento);
+                }
+                break;
+            case 2:
+                for (ArvoreVermelhoPreto.Node<Integer, String> no : nosVP) {
+                    desenharNo(no, espacamento, espacamento);
+                }
+                break;
+        }        
         endMode2D();
         
         //Desenhando o Plano de Fundo do Programa
@@ -534,6 +603,44 @@ public class Main extends EngineFrame {
             default -> drawText(no.value, x - 14 , y - 5, 15, BLACK);
         }
         drawCircle( x, y, raio, BLACK );
+    }
+    
+    private void desenharNo(ArvoreAVL.Node<Integer, String> no, int espHorizontal, int espVertical) {
+
+        int x = espHorizontal * no.ranque + margemEsquerda;
+        int y = espVertical * no.nivel + margemCima;
+
+        int numDigitos = String.valueOf(no.key).length();
+
+        fillCircle(x, y, raio, no.cor);
+        switch (numDigitos) {
+            case 1 ->
+                drawText(no.value, x - 4, y - 5, 15, BLACK);
+            case 2 ->
+                drawText(no.value, x - 9, y - 5, 15, BLACK);
+            default ->
+                drawText(no.value, x - 14, y - 5, 15, BLACK);
+        }
+        drawCircle(x, y, raio, BLACK);
+    }
+    
+    private void desenharNo(ArvoreVermelhoPreto.Node<Integer, String> no, int espHorizontal, int espVertical) {
+
+        int x = espHorizontal * no.ranque + margemEsquerda;
+        int y = espVertical * no.nivel + margemCima;
+
+        int numDigitos = String.valueOf(no.key).length();
+
+        fillCircle(x, y, raio, no.cor);
+        switch (numDigitos) {
+            case 1 ->
+                drawText(no.value, x - 4, y - 5, 15, BLACK);
+            case 2 ->
+                drawText(no.value, x - 9, y - 5, 15, BLACK);
+            default ->
+                drawText(no.value, x - 14, y - 5, 15, BLACK);
+        }
+        drawCircle(x, y, raio, BLACK);
     }
     
     //----------< Instanciar Engine e Iniciá-la >----------//

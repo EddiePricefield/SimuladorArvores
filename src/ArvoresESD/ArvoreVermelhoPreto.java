@@ -4,6 +4,8 @@ import aesd.ds.implementations.linear.LinkedQueue;
 import aesd.ds.implementations.linear.ResizingArrayList;
 import aesd.ds.interfaces.List;
 import aesd.ds.interfaces.Queue;
+import br.com.davidbuzatto.jsge.core.engine.EngineFrame;
+import java.awt.Color;
 import java.util.Iterator;
 
 /**
@@ -30,7 +32,12 @@ public class ArvoreVermelhoPreto<Key extends Comparable<Key>, Value> implements 
         public Node<Key, Value> right;
 
         public NodeColor color;
+        
         public int size;
+        
+        public int nivel;
+        public int ranque;
+        public Color cor;
         
         @Override
         public String toString() {
@@ -454,6 +461,27 @@ public class ArvoreVermelhoPreto<Key extends Comparable<Key>, Value> implements 
         
         return sb.toString();
         
+    }
+    
+    public List<ArvoreVermelhoPreto.Node<Key, Value>> coletarParaDesenho() {
+        List<ArvoreVermelhoPreto.Node<Key, Value>> nos = new ResizingArrayList<>();
+        emOrdemColeta(root, nos, 0);
+        return nos;
+    }
+
+    private void emOrdemColeta(ArvoreVermelhoPreto.Node<Key, Value> node, List<ArvoreVermelhoPreto.Node<Key, Value>> nos, int nivel) {
+        if (node != null) {
+            emOrdemColeta(node.left, nos, nivel + 1);
+            node.nivel = nivel;
+            node.ranque = nos.getSize();
+            if (node.color == NodeColor.RED){
+                node.cor = EngineFrame.RED;
+            } else{
+                node.cor = EngineFrame.GRAY;
+            }
+            nos.add(node);
+            emOrdemColeta(node.right, nos, nivel + 1);
+        }
     }
     
     private void preOrderForPrint( Node<Key, Value> node, String ident, String leftRight, StringBuilder sb ) {

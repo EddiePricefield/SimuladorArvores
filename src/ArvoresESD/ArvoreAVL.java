@@ -4,6 +4,8 @@ import aesd.ds.implementations.linear.LinkedQueue;
 import aesd.ds.implementations.linear.ResizingArrayList;
 import aesd.ds.interfaces.List;
 import aesd.ds.interfaces.Queue;
+import br.com.davidbuzatto.jsge.core.engine.EngineFrame;
+import java.awt.Color;
 import java.util.Iterator;
 
 /**
@@ -28,6 +30,9 @@ public class ArvoreAVL<Key extends Comparable<Key>, Value> implements Iterable<K
         public Value value;
         public Node<Key, Value> left;
         public Node<Key, Value> right;
+        public int nivel;
+        public int ranque;
+        public Color cor;
         
         public int height;
         
@@ -439,6 +444,23 @@ public class ArvoreAVL<Key extends Comparable<Key>, Value> implements Iterable<K
         
         return sb.toString();
         
+    }
+    
+    public List<ArvoreAVL.Node<Key, Value>> coletarParaDesenho() {
+        List<ArvoreAVL.Node<Key, Value>> nos = new ResizingArrayList<>();
+        emOrdemColeta(root, nos, 0);
+        return nos;
+    }
+
+    private void emOrdemColeta(ArvoreAVL.Node<Key, Value> node, List<ArvoreAVL.Node<Key, Value>> nos, int nivel) {
+        if (node != null) {
+            emOrdemColeta(node.left, nos, nivel + 1);
+            node.nivel = nivel;
+            node.ranque = nos.getSize();
+            node.cor = EngineFrame.BEIGE;
+            nos.add(node);
+            emOrdemColeta(node.right, nos, nivel + 1);
+        }
     }
     
     private void preOrderForPrint( Node<Key, Value> node, String ident, String leftRight, StringBuilder sb ) {
