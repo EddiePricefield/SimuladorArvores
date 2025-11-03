@@ -74,6 +74,7 @@ public class Main extends EngineFrame {
     private Vector2 animFim;
     private double animTempo;    
     private double animVel;
+    private double ranqueAnterior = -1;
     
     //Variáveis para Criação das Árvores
     private ArvoreBinariaBusca<Integer, String> arvoreBB;
@@ -292,7 +293,6 @@ public class Main extends EngineFrame {
             if (dropdownTipoArvore.getSelectedItemIndex() == 0){
                 
                 animValue = textFieldValor.getValue();
-                animPos = animIni;
                 animTempo = 0;
                 
                 arvoreBB.put(Integer.valueOf(textFieldValor.getValue()), textFieldValor.getValue());
@@ -301,9 +301,17 @@ public class Main extends EngineFrame {
                 for (var no : nos){
                     if (Objects.equals(no.key, Integer.valueOf(animValue))){
                         animFim = new Vector2 (espacamento * no.ranque + margemEsquerda, espacamento * no.nivel + margemCima);
+                        
+                        if (no.ranque == ranqueAnterior){
+                            animIni = new Vector2 (espacamento * (no.ranque + 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
+                        }
+                        
+                        ranqueAnterior = no.ranque;
+                        
                     }
                 }
                 
+                animPos = animIni;
                 animando = true;
             }
             
