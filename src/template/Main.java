@@ -75,6 +75,8 @@ public class Main extends EngineFrame {
     private double animTempo;    
     private double animVel;
     private double ranqueAnterior = -1;
+    private double nivelAnterior = -1;
+    boolean igualDeNovo = false;
     
     //Variáveis para Criação das Árvores
     private ArvoreBinariaBusca<Integer, String> arvoreBB;
@@ -321,12 +323,15 @@ public class Main extends EngineFrame {
                 for (var no : nosAVL) {
                     if (Objects.equals(no.key, Integer.valueOf(animValue))) {
                         animFim = new Vector2(espacamento * no.ranque + margemEsquerda, espacamento * no.nivel + margemCima);
-
+                        
                         if (no.ranque == ranqueAnterior) {
                             animIni = new Vector2(espacamento * (no.ranque + 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
-                        }
+                        } else if (no.nivel == nivelAnterior){
+                            animIni = new Vector2(espacamento * (no.ranque - 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
+                        } 
 
                         ranqueAnterior = no.ranque;
+                        nivelAnterior = no.nivel;
 
                     }
                 }
@@ -341,9 +346,19 @@ public class Main extends EngineFrame {
 
                         if (no.ranque == ranqueAnterior) {
                             animIni = new Vector2(espacamento * (no.ranque + 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
+                            igualDeNovo = false;
+                        } else if (igualDeNovo){
+                            animIni = new Vector2(espacamento * (no.ranque - 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
+                            igualDeNovo = false;                            
+                        } else if(no.nivel == nivelAnterior){
+                            animIni = new Vector2(espacamento * (no.ranque - 1) + margemEsquerda, espacamento * (no.nivel + 1) + margemCima);
+                            igualDeNovo = true;
                         }
-
+                        
                         ranqueAnterior = no.ranque;
+                        nivelAnterior = no.nivel;
+                        
+                        System.out.println("R: " + ranqueAnterior + " N: " + nivelAnterior + "B: " + igualDeNovo);
 
                     }
                 }
