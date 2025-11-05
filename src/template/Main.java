@@ -89,6 +89,9 @@ public class Main extends EngineFrame {
     private int margemEsquerda;
     private int raio;
     private int espacamento;
+    
+    private List<Vector2> arestaIni;
+    private List<Vector2> arestaFim;
 
     public Main() {
 
@@ -115,6 +118,9 @@ public class Main extends EngineFrame {
 
         componentes = new ArrayList<>();
         camera = new Camera2D();
+        
+        arestaIni = new ArrayList<>();
+        arestaFim = new ArrayList<>();
 
         //Variáveis para referência
         int x = 1048;
@@ -298,6 +304,8 @@ public class Main extends EngineFrame {
             if (dropdownTipoArvore.getSelectedItemIndex() == 0) {
                 arvoreBB.put(Integer.valueOf(textFieldValor.getValue()), textFieldValor.getValue());
                 nosBB = arvoreBB.coletarParaDesenho();
+                
+                adicionarAresta();
 
                 for (var no : nosBB) {
                     if (Objects.equals(no.key, Integer.valueOf(animValue))) {
@@ -306,7 +314,7 @@ public class Main extends EngineFrame {
                         if (no.ranque == ranqueAnterior) {
                             animIni = new Vector2(espacamento * (no.ranque + 1) + margemEsquerda, espacamento * (no.nivel - 1) + margemCima);
                         }
-
+                        
                         ranqueAnterior = no.ranque;
 
                     }
@@ -315,6 +323,8 @@ public class Main extends EngineFrame {
             } else if (dropdownTipoArvore.getSelectedItemIndex() == 1) {
                 arvoreAVL.put(Integer.valueOf(textFieldValor.getValue()), textFieldValor.getValue());
                 nosAVL = arvoreAVL.coletarParaDesenho();
+                
+                adicionarAresta();
 
                 for (var no : nosAVL) {
                     if (Objects.equals(no.key, Integer.valueOf(animValue))) {
@@ -335,6 +345,8 @@ public class Main extends EngineFrame {
             } else {
                 arvoreVP.put(Integer.valueOf(textFieldValor.getValue()), textFieldValor.getValue());
                 nosVP = arvoreVP.coletarParaDesenho();
+                
+                adicionarAresta();
 
                 for (var no : nosVP) {
                     if (Objects.equals(no.key, Integer.valueOf(animValue))) {
@@ -353,8 +365,6 @@ public class Main extends EngineFrame {
 
                         ranqueAnterior = no.ranque;
                         nivelAnterior = no.nivel;
-
-                        System.out.println("R: " + ranqueAnterior + " N: " + nivelAnterior + "B: " + igualDeNovo);
 
                     }
                 }
@@ -405,6 +415,8 @@ public class Main extends EngineFrame {
 
             confirmDeletarArvore.hide();
             animIni = new Vector2(margemEsquerda, margemCima);
+            arestaIni.clear();
+            arestaFim.clear();
 
             textFieldValor.setValue(valorAnterior);
 
@@ -418,22 +430,20 @@ public class Main extends EngineFrame {
 
             if (!arvoreBB.isEmpty()) {
                 arvoreBB.clear();
-                nosBB = arvoreBB.coletarParaDesenho();
-                ranqueAnterior = -1;
-                animIni = new Vector2(margemEsquerda, margemCima);
+                nosBB = arvoreBB.coletarParaDesenho();              
             } else if (!arvoreAVL.isEmpty()) {
                 arvoreAVL.clear();
                 nosAVL = arvoreAVL.coletarParaDesenho();
-                ranqueAnterior = -1;
-                animIni = new Vector2(margemEsquerda, margemCima);
             } else if (!arvoreVP.isEmpty()) {
                 arvoreVP.clear();
                 nosVP = arvoreVP.coletarParaDesenho();
-                ranqueAnterior = -1;
-                animIni = new Vector2(margemEsquerda, margemCima);
             }
-
+            
+            ranqueAnterior = -1;
+            animIni = new Vector2(margemEsquerda, margemCima);
             indexAnteriorDropdown = dropdownTipoArvore.getSelectedItemIndex();
+            arestaIni.clear();
+            arestaFim.clear();
 
         }
 
@@ -524,6 +534,7 @@ public class Main extends EngineFrame {
 
         //Desenhar a Árvore (Quero que fique atrás de tudo)
         beginMode2D(camera);
+        desenharLinhas();
 
         switch (dropdownTipoArvore.getSelectedItemIndex()) {
             case 0:
@@ -542,6 +553,7 @@ public class Main extends EngineFrame {
                 }
                 break;
         }
+        
         endMode2D();
 
         //Desenhando o Plano de Fundo do Programa
@@ -690,6 +702,121 @@ public class Main extends EngineFrame {
                 drawText(no.value, x - 14, y - 5, 15, BLACK);
         }
         drawCircle(x, y, raio, BLACK);
+
+    }
+    
+    private void adicionarAresta(){
+        
+        // Gerar arestas para ABB
+        arestaIni.clear();
+        arestaFim.clear();
+        
+        if (dropdownTipoArvore.getSelectedItemIndex() == 0){
+            
+            for (var no : nosBB) {
+
+                // Posição do pai
+                Vector2 paiPos = new Vector2(
+                        espacamento * no.ranque + margemEsquerda,
+                        espacamento * no.nivel + margemCima
+                );
+
+                // Filho esquerdo
+                if (no.left != null) {
+                    Vector2 filhoPos = new Vector2(
+                            espacamento * no.left.ranque + margemEsquerda,
+                            espacamento * no.left.nivel + margemCima
+                    );
+                    arestaIni.add(paiPos);
+                    arestaFim.add(filhoPos);
+                }
+
+                // Filho direito
+                if (no.right != null) {
+                    Vector2 filhoPos = new Vector2(
+                            espacamento * no.right.ranque + margemEsquerda,
+                            espacamento * no.right.nivel + margemCima
+                    );
+                    arestaIni.add(paiPos);
+                    arestaFim.add(filhoPos);
+                }
+            } 
+        } else if (dropdownTipoArvore.getSelectedItemIndex() == 1){
+            
+            for (var no : nosAVL) {
+
+                // Posição do pai
+                Vector2 paiPos = new Vector2(
+                        espacamento * no.ranque + margemEsquerda,
+                        espacamento * no.nivel + margemCima
+                );
+
+                // Filho esquerdo
+                if (no.left != null) {
+                    Vector2 filhoPos = new Vector2(
+                            espacamento * no.left.ranque + margemEsquerda,
+                            espacamento * no.left.nivel + margemCima
+                    );
+                    arestaIni.add(paiPos);
+                    arestaFim.add(filhoPos);
+                }
+
+                // Filho direito
+                if (no.right != null) {
+                    Vector2 filhoPos = new Vector2(
+                            espacamento * no.right.ranque + margemEsquerda,
+                            espacamento * no.right.nivel + margemCima
+                    );
+                    arestaIni.add(paiPos);
+                    arestaFim.add(filhoPos);
+                }
+            }
+            
+        }else{
+            
+            for (var no : nosVP) {
+
+                // Posição do pai
+                Vector2 paiPos = new Vector2(
+                        espacamento * no.ranque + margemEsquerda,
+                        espacamento * no.nivel + margemCima
+                );
+
+                // Filho esquerdo
+                if (no.left != null) {
+                    Vector2 filhoPos = new Vector2(
+                            espacamento * no.left.ranque + margemEsquerda,
+                            espacamento * no.left.nivel + margemCima
+                    );
+                    arestaIni.add(paiPos);
+                    arestaFim.add(filhoPos);
+                }
+
+                // Filho direito
+                if (no.right != null) {
+                    Vector2 filhoPos = new Vector2(
+                            espacamento * no.right.ranque + margemEsquerda,
+                            espacamento * no.right.nivel + margemCima
+                    );
+                    arestaIni.add(paiPos);
+                    arestaFim.add(filhoPos);
+                }
+            }
+            
+        }
+
+    }
+    
+    private void desenharLinhas(){
+        
+        if (!arestaIni.isEmpty() && !arestaFim.isEmpty()){
+            
+            for(int i = 0; i < arestaIni.size(); i++){
+                drawLine(arestaIni.get(i), arestaFim.get(i), BLACK);                
+            }
+
+        }
+        
     }
 
     //----------< Instanciar Engine e Iniciá-la >----------//
