@@ -14,18 +14,20 @@ import br.com.davidbuzatto.jsge.imgui.GuiCheckBox;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiConfirmDialog;
 import br.com.davidbuzatto.jsge.imgui.GuiDropdownList;
+import br.com.davidbuzatto.jsge.imgui.GuiLabelButton;
 import br.com.davidbuzatto.jsge.imgui.GuiTextField;
 import static br.com.davidbuzatto.jsge.math.MathUtils.lerp;
 import br.com.davidbuzatto.jsge.math.Vector2;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Paint;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * Nome do Projeto.
- *
+ * Projeto de Simulação de Árvores - Estruturas de Dados.
  * @author Eddie Pricefield
  *
  * Engine JSGE
@@ -92,6 +94,8 @@ public class Main extends EngineFrame {
     
     private List<Vector2> arestaIni;
     private List<Vector2> arestaFim;
+    
+    private GuiLabelButton btnLink;
 
     public Main() {
 
@@ -178,6 +182,8 @@ public class Main extends EngineFrame {
         //Mensagem para caso queira remover um nó
         confirmDeletarNo = new GuiConfirmDialog("Remoção de Nó", "Você tem certeza que deseja remover este nó?", "Sim", "Não", "", true);
         confirmDeletarArvore = new GuiConfirmDialog("Limpar a Tela de Nós", "Esta ação irá excluir todos os nós da árvore.\nDeseja prosseguir?", "Sim", "Não", "", true);
+        
+        btnLink = new GuiLabelButton(getWidth() - 140, getHeight() - 65, 120, 20, "@EddiePricefield");
 
         //Inserir os Componentes na Lista
         componentes.add(btnCima);
@@ -197,6 +203,8 @@ public class Main extends EngineFrame {
 
         componentes.add(confirmDeletarNo);
         componentes.add(confirmDeletarArvore);
+        
+        componentes.add(btnLink);
 
     }
 
@@ -522,6 +530,17 @@ public class Main extends EngineFrame {
             }
 
         }
+        
+        if (btnLink.isMousePressed()) {
+
+            try {
+                URI link = new URI("https://github.com/EddiePricefield");
+                Desktop.getDesktop().browse(link);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
 
     }
 
@@ -572,10 +591,12 @@ public class Main extends EngineFrame {
         drawCircle(1168, 125, 25, BLACK);
         fillCircle(958, 125, 25, WHITE);
         drawCircle(958, 125, 25, BLACK);
-
-        //Quadro para Animação
-        fillRectangle(960, 275, 200, 125, WHITE);
-        drawRectangle(960, 275, 200, 125, BLACK);
+        
+        //Design da Televisão (espaço em branco)
+        for (int i = 0; i < 7; i++){
+            fillRectangle(960, 275 + 20 * i, 200 , 10, BROWN);
+            drawRectangle(960, 275 + 20 * i, 200 , 10, BLACK);
+        }
 
         beginMode2D(camera);
         if (animando) {
