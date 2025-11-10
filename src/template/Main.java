@@ -529,6 +529,8 @@ public class Main extends EngineFrame {
                     }
                 }
             }
+            
+            adicionarAresta();
 
         }
         
@@ -644,11 +646,11 @@ public class Main extends EngineFrame {
         //Textos do Projeto
         switch (dropdownTipoArvore.getSelectedItemIndex()) {
             case 0 ->
-                drawOutlinedText("Árvore Binária de Busca", 70, 65, 20, background, 1, BLACK);
+                drawOutlinedText("Árvore Binária de Busca", 70, 65, 20, corAuxiliar, 1, BLACK);
             case 1 ->
-                drawOutlinedText("Árvore AVL", 70, 65, 20, background, 1, BLACK);
+                drawOutlinedText("Árvore AVL", 70, 65, 20, corAuxiliar, 1, BLACK);
             case 2 ->
-                drawOutlinedText("Árvore Vermelho e Preto", 70, 65, 20, background, 1, BLACK);
+                drawOutlinedText("Árvore Vermelho e Preto", 70, 65, 20, corAuxiliar, 1, BLACK);
         }
 
         desenharComponentes();
