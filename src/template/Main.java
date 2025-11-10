@@ -16,6 +16,7 @@ import br.com.davidbuzatto.jsge.imgui.GuiConfirmDialog;
 import br.com.davidbuzatto.jsge.imgui.GuiDropdownList;
 import br.com.davidbuzatto.jsge.imgui.GuiLabelButton;
 import br.com.davidbuzatto.jsge.imgui.GuiTextField;
+import br.com.davidbuzatto.jsge.imgui.GuiTheme;
 import static br.com.davidbuzatto.jsge.math.MathUtils.lerp;
 import br.com.davidbuzatto.jsge.math.Vector2;
 import java.awt.Color;
@@ -547,9 +548,13 @@ public class Main extends EngineFrame {
     //----------< Desenhar >----------//
     @Override
     public void draw() {
+        
+        Color background = new Color(0xff965031);
+        Color corAuxiliar = new Color(0xffDFA48A);
 
         //Desenhando área de visualização das árvores
-        fillRectangle(exibicaoArvore, WHITE);
+        fillRectangle(25, 25, 900, 550, corAuxiliar);
+        fillRectangle(40, 40, 870, 520, new Color(0xffFFFDD9));
 
         //Desenhar a Árvore (Quero que fique atrás de tudo)
         beginMode2D(camera);
@@ -576,25 +581,35 @@ public class Main extends EngineFrame {
         endMode2D();
 
         //Desenhando o Plano de Fundo do Programa
-        Color background = BEIGE;
-
-        drawRectangle(exibicaoArvore, BLACK);
+        drawRectangle(25, 25, 900, 550, BLACK);        
         fillRectangle(0, 0, 1200, 25, background);
         fillRectangle(926, 0, 277, 600, background);
         fillRectangle(0, 576, 1200, 25, background);
         fillRectangle(0, 0, 25, 600, background);
+        
+        drawRectangle(40, 40, 870, 520, BLACK);
+        fillRectangle(26, 26, 14, 549, corAuxiliar);
+        fillRectangle(26, 26, 889, 14, corAuxiliar);
+        fillRectangle(911, 26, 14, 549, corAuxiliar);
+        fillRectangle(26, 561, 889, 14, corAuxiliar);
 
         //Círculo atrás do Joystick
-        fillCircle(1063, 125, 70, WHITE);
+        fillCircle(1063, 125, 70, corAuxiliar);
+        fillCircle(1063, 125, 60, LIGHTGRAY);
+        drawCircle(1063, 125, 60, BLACK);
         drawCircle(1063, 125, 70, BLACK);
-        fillCircle(1168, 125, 25, WHITE);
+        fillCircle(1168, 125, 25, corAuxiliar);
+        fillCircle(1168, 125, 20, LIGHTGRAY);
+        drawCircle(1168, 125, 20, BLACK);
         drawCircle(1168, 125, 25, BLACK);
-        fillCircle(958, 125, 25, WHITE);
+        fillCircle(958, 125, 25, corAuxiliar);
+        fillCircle(958, 125, 20, LIGHTGRAY);
+        drawCircle(958, 125, 20, BLACK);
         drawCircle(958, 125, 25, BLACK);
         
         //Design da Televisão (espaço em branco)
         for (int i = 0; i < 7; i++){
-            fillRectangle(960, 275 + 20 * i, 200 , 10, BROWN);
+            fillRectangle(960, 275 + 20 * i, 200 , 10, new Color(0xff481701));
             drawRectangle(960, 275 + 20 * i, 200 , 10, BLACK);
         }
 
@@ -616,22 +631,24 @@ public class Main extends EngineFrame {
 
         }
         endMode2D();
+        
+        textFieldValor.setBackgroundColor(new Color(0xffC8C8C8));
 
         //Limitação de Digitos
-        fillRectangle(960, 470, 200, 40, WHITE);
+        fillRectangle(960, 470, 200, 40, new Color(0xffC8C8C8));
         drawRectangle(960, 470, 200, 40, BLACK);
         if (checkLimite.isSelected()) {
-            drawText("*máximo de 3 dígitos", 995, 520, 12, RED);
+            drawText("*máximo de 3 dígitos", 980, 520, 13, corAuxiliar);
         }
 
         //Textos do Projeto
         switch (dropdownTipoArvore.getSelectedItemIndex()) {
             case 0 ->
-                drawOutlinedText("Árvore Binária de Busca", 50, 50, 20, BEIGE, 1, BLACK);
+                drawOutlinedText("Árvore Binária de Busca", 70, 65, 20, background, 1, BLACK);
             case 1 ->
-                drawOutlinedText("Árvore AVL", 50, 50, 20, BEIGE, 1, BLACK);
+                drawOutlinedText("Árvore AVL", 70, 65, 20, background, 1, BLACK);
             case 2 ->
-                drawOutlinedText("Árvore Vermelho e Preto", 50, 50, 20, BEIGE, 1, BLACK);
+                drawOutlinedText("Árvore Vermelho e Preto", 70, 65, 20, background, 1, BLACK);
         }
 
         desenharComponentes();

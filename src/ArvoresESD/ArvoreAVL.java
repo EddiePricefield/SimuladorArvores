@@ -457,7 +457,7 @@ public class ArvoreAVL<Key extends Comparable<Key>, Value> implements Iterable<K
             emOrdemColeta(node.left, nos, nivel + 1);
             node.nivel = nivel;
             node.ranque = nos.getSize();
-            node.cor = EngineFrame.BEIGE;
+            node.cor = new Color(0xff05B4D5);
             nos.add(node);
             emOrdemColeta(node.right, nos, nivel + 1);
         }
